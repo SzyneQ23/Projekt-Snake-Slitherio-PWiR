@@ -1,7 +1,7 @@
-class_name ClientTCP extends Node
+class_name TcpClient extends Node
 ## Main class for TCP communication with the server
-## Other classes can read incoming data by adding event handlers to the signals below
-## Or send data with the send function 
+## Other classes can read incoming data by adding event handlers to the signals defined below
+## Or send data with the send_packet 
 
 signal packet_received(packet:NetworkPacket.BaseNetworkPacket)
 signal disconnected
@@ -13,7 +13,7 @@ const HOST_ADDRESS = "127.0.0.1"
 const HOST_PORT = 5000
 
 
-var stream_peer:StreamPeerTCP = StreamPeerTCP.new()
+var stream_peer:StreamPeerTCP = null
 var peer_status: StreamPeerSocket.Status = StreamPeerSocket.Status.STATUS_NONE
 
 func is_connected_to_server() -> bool:
@@ -25,6 +25,7 @@ func connect_to_host() -> bool:
 		return true
 	
 	print_debug("Connecting to host %s at port %d" % [HOST_ADDRESS, HOST_PORT])
+	stream_peer = StreamPeerTCP.new()
 	var connection_result = stream_peer.connect_to_host(HOST_ADDRESS, HOST_PORT)
 	if connection_result != OK:
 		push_error("Couldn't resolve host")
@@ -44,7 +45,20 @@ func connect_to_host() -> bool:
 	connected.emit()
 	return true
 
+func send_packet(packet: NetworkPacket.BaseNetworkPacket):
+	if stream_peer.get_status() != StreamPeerSocket.Status.STATUS_CONNECTED:
+		print(stream_peer.get_status())
+		push_error("Tried to send a packet but connection is not established")
+		return
+	
+	var result = stream_peer.put_data(packet.into_bytes())
+	if result != OK:
+		push_error("Failed to send packet")
+
 func _process(delta: float) -> void:
+	if stream_peer == null:
+		return
+	
 	stream_peer.poll()
 	var new_status = stream_peer.get_status()
 	
@@ -55,6 +69,7 @@ func _process(delta: float) -> void:
 			disconnected.emit()
 			queue_free()
 		if new_status == StreamPeerSocket.Status.STATUS_NONE:
+			push_error("ERROR: Connection error")
 			disconnected.emit()
 			queue_free()
 		peer_status = new_status
@@ -72,7 +87,6 @@ func _process(delta: float) -> void:
 	received_bytes = stream_peer.get_available_bytes()
 	
 	# Handle the case where expected network packet doesn't fit into a single TCP packet - wait for the rest of it
-	
 	while received_bytes < packet_size - 4: # -4 because we already read 4 bytes from the TCP stream
 		stream_peer.poll()
 		received_bytes = stream_peer.get_available_bytes()

@@ -1,9 +1,11 @@
 63f7b34db8d8cdea90c76aacccf841ec
-::res://::1779620053
-tcp_client.gd::GDScript::7609152139624202197::1779620053::0::1::::ClientTCP<>Node<><>0<>0<><>::
+::res://::1779654831
 ::res://assets/::1779611540
 snake.jpg::CompressedTexture2D::8751827204859243094::1779611527::1779611540::1::::<><><>0<>0<>ce065c8ce04080449c1ee6e7b6621af5<>res://.godot/imported/snake.jpg-1039c5921bd16bda894923a06c7e3ed6.ctex::
-::res://scenes/::1779620053
-network_packet.gd::GDScript::1047199489224524873::1779619877::0::1::::<>Node<><>0<>0<><>::
-tcp_test.gd::GDScript::8283403243870915504::1779619936::0::1::::<>Node2D<><>0<>0<><>::
-tcp_test.tscn::PackedScene::7661137668585959877::1779620053::0::1::::<><><>0<>0<><>::uid://dqaspabfyrcjo::::res://scenes/tcp_test.gd<>uid://dgn6vhm23ws66::::res://tcp_client.gd<>uid://dwxpkyuyq0axa::::res://assets/snake.jpg
+::res://scenes/::1779656329
+tcp_test.gd::GDScript::8283403243870915504::1779656260::0::1::::<>Node2D<><>0<>0<><>::
+tcp_test.tscn::PackedScene::7661137668585959877::1779656329::0::1::::<><><>0<>0<><>::uid://dqaspabfyrcjo::::res://scenes/tcp_test.gd<>uid://dwxpkyuyq0axa::::res://assets/snake.jpg
+::res://scripts/::1779642874
+::res://scripts/autoloads/::1779656215
+network_packet.gd::GDScript::1047199489224524873::1779656215::0::1::::<>Node<><>0<>0<><>::
+tcp_client.gd::GDScript::7609152139624202197::1779654821::0::1::::TcpClient<>Node<><>0<>0<><>::

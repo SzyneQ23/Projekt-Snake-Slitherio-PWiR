@@ -4,24 +4,45 @@
 #include "constants.h"
 
 typedef enum {
-    PACKET_BOARD_DATA
+    PACKET_GAME_DATA,
+    PACKET_PLAYER_INPUT,
 } PacketType;
 
 typedef struct {
     int pos_x;
     int pos_y;
-} BoardPlayerData;
+    int move_dir_x;
+    int move_dir_y;
+} PlayerData;
 
 typedef struct {
+    int connected_player_id;
+
     int player_count;
-    BoardPlayerData players[MAX_PLAYER_COUNT];
-} BoardData;
+    PlayerData players[MAX_PLAYER_COUNT];
+
+} GameDataPacket;
+
+
+typedef enum {
+    Left,
+    Right,
+    Up,
+    Down,
+} PlayerInputType;
+
+typedef struct {
+    PlayerInputType input_type;
+} PlayerInputEvent;
 
 typedef struct {
     int size;
     PacketType packet_type;
+
+    // Data specific to given packet type
     union {
-        BoardData board_data;
+        GameDataPacket game_data;
+        PlayerInputEvent input_event;
     };
 } NetworkPacket;
 
