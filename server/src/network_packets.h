@@ -18,6 +18,7 @@ typedef struct {
 } BoardData;
 
 typedef struct {
+    int size;
     PacketType packet_type;
     union {
         BoardData board_data;

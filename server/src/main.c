@@ -36,6 +36,7 @@ void* connection_handler(void *socket_desc) {
     board_data.players[0] = player_data;
 
     NetworkPacket packet = {
+        .size = sizeof(NetworkPacket),
         .packet_type = PACKET_BOARD_DATA,
         .board_data = board_data
     };
@@ -50,6 +51,7 @@ void* connection_handler(void *socket_desc) {
         packet.board_data.players[0].pos_x += 1;
 
         write(sock, &packet , sizeof(packet));
+        printf("Pushed packet of size %zu\n", sizeof(packet));
         sleep(1);
     } while(read_size > 2); /* Wait for empty line */
 

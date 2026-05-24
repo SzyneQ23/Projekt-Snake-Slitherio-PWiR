@@ -64,22 +64,29 @@ func _process(delta: float) -> void:
 		return
 	
 	var received_bytes: int = stream_peer.get_available_bytes()
-	if received_bytes > NetworkPacket.BaseNetworkPacket.byte_size:
-		# Has to match structure of the data sent from the server
-		var packet:NetworkPacket.BaseNetworkPacket = read_packet()
-		if packet != null:
-			packet_received.emit(packet)
-
-
-
-func read_packet() -> NetworkPacket.BaseNetworkPacket:
-	var packet_type: NetworkPacket.PacketType = stream_peer.get_32()
-	if packet_type == NetworkPacket.PacketType.BoardData:
-		# print_debug("Received board data")
-		var packet := NetworkPacket.BoardDataPacket.new()
-		packet.read_from_network(stream_peer)
-		return packet
-	elif packet_type == NetworkPacket.PacketType.PlayerInput:
-		print_debug("received player inpu")
+	if received_bytes == 0: return
 	
-	return null
+	# First value in a transmited packet specifies its size
+	var packet_size: int = stream_peer.get_32()
+	
+	received_bytes = stream_peer.get_available_bytes()
+	
+	# Handle the case where expected network packet doesn't fit into a single TCP packet - wait for the rest of it
+	
+	while received_bytes < packet_size - 4: # -4 because we already read 4 bytes from the TCP stream
+		stream_peer.poll()
+		received_bytes = stream_peer.get_available_bytes()
+	
+	var packet_bytes = stream_peer.get_data(packet_size-4)
+	if packet_bytes[0] != OK:
+		push_error("Error occurred while reading data from TCP stream")
+		return
+	var bytes: PackedByteArray = packet_bytes[1]
+		
+	var packet:NetworkPacket.BaseNetworkPacket = NetworkPacket.read_packet(bytes) # we already read 4 bytes to get the packet_size
+	
+	if packet == null:
+		push_error("Couldn't parse received packet")
+		return
+	
+	packet_received.emit(packet)
