@@ -1,0 +1,80 @@
+[gd_scene format=3 uid="uid://dhfd22yok5bdl"]
+
+[ext_resource type="Script" uid="uid://dqaspabfyrcjo" path="res://scenes/tcp_test.gd" id="1_m2txu"]
+[ext_resource type="Texture2D" uid="uid://dwxpkyuyq0axa" path="res://assets/snake.jpg" id="3_txiec"]
+
+[node name="TCP Test" type="Node2D" unique_id=1033222761]
+script = ExtResource("1_m2txu")
+
+[node name="TestPlayer1" type="Sprite2D" parent="." unique_id=1035283911]
+scale = Vector2(0.08911134, 0.08911134)
+texture = ExtResource("3_txiec")
+
+[node name="Label" type="Label" parent="TestPlayer1" unique_id=348901969]
+offset_left = 538.652
+offset_top = -774.3122
+offset_right = 548.652
+offset_bottom = -751.3122
+scale = Vector2(20, 20)
+text = "1"
+
+[node name="TestPlayer2" type="Sprite2D" parent="." unique_id=351557094]
+scale = Vector2(0.08911134, 0.08911134)
+texture = ExtResource("3_txiec")
+
+[node name="Label" type="Label" parent="TestPlayer2" unique_id=1502496934]
+offset_left = 538.652
+offset_top = -774.3122
+offset_right = 548.652
+offset_bottom = -751.3122
+scale = Vector2(20, 20)
+text = "2"
+
+[node name="TestPlayer3" type="Sprite2D" parent="." unique_id=932437428]
+scale = Vector2(0.08911134, 0.08911134)
+texture = ExtResource("3_txiec")
+
+[node name="Label" type="Label" parent="TestPlayer3" unique_id=2081919562]
+offset_left = 538.652
+offset_top = -774.3122
+offset_right = 548.652
+offset_bottom = -751.3122
+scale = Vector2(20, 20)
+text = "3"
+
+[node name="TestPlayer4" type="Sprite2D" parent="." unique_id=1049204082]
+scale = Vector2(0.08911134, 0.08911134)
+texture = ExtResource("3_txiec")
+
+[node name="Label" type="Label" parent="TestPlayer4" unique_id=1129088399]
+offset_left = 538.652
+offset_top = -774.3122
+offset_right = 548.652
+offset_bottom = -751.3122
+scale = Vector2(20, 20)
+text = "4"
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=1336527670]
+
+[node name="ConnectButton" type="Button" parent="UI" unique_id=204343268]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Connect"
+
+[node name="PlayerIDLabel" type="Label" parent="UI" unique_id=714186937]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -40.0
+offset_bottom = 23.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 24
