@@ -35,6 +35,8 @@ typedef struct {
     PlayerInputType input_type;
 } PlayerInputEvent;
 
+
+// Main struct that is sent over the network
 typedef struct {
     int size;
     PacketType packet_type;

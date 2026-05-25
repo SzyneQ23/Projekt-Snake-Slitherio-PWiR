@@ -11,8 +11,14 @@
 #include "constants.h"
 #include "network_packets.h"
 
-// TODO:
-// - server needs to have a specified board update rate
+
+// size of buffer used for storing incoming messages
+#define RECV_BUFFER_SIZE 1024
+
+const uint16_t PORT = 5000;
+
+// How many incoming connections to hold in queue. If the number of pending connections exceeds this, they will be refused
+const int PENDING_CONNECTIONS = 10;
 
 
 typedef struct {
@@ -25,8 +31,6 @@ GameState global_state = {
     .player_count = 0
 };
 
-// size of buffer used for storing incoming messages
-#define RECV_BUFFER_SIZE 1024
 
 
 void handle_incoming_packet(char* bytes, int player_idx){
@@ -70,7 +74,7 @@ void* connection_handler(void *socket_desc) {
     // index of the player assigned to this thread.
     int player_index = global_state.player_count;
 
-    // player starts at (0, 1) pointing right
+    // player starts at (0, 0) pointing right
     PlayerData player_data = {
         .pos_x = 0,
         .pos_y = 0,
@@ -137,10 +141,6 @@ void* connection_handler(void *socket_desc) {
     pthread_exit(NULL);
 }
 
-const uint16_t PORT = 5000;
-
-// How many incoming connections to hold in queue. If the number of pending connections exceeds this, they will be refused
-const int PENDING_CONNECTIONS = 10;
 
 int main(int argc, char *argv[]) {
     int socketfd = 0, connfd = 0;
