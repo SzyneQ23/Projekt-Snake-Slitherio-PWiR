@@ -8,12 +8,18 @@ typedef enum {
     PACKET_PLAYER_INPUT,
 } PacketType;
 
+typedef struct{
+      int x;
+      int y;  
+} Position;
+
 typedef struct {
-    int pos_x;
-    int pos_y;
     int move_dir_x;
     int move_dir_y;
+    Position pos[MAX_SNAKE_LENGTH];
+    int length;
 } PlayerData;
+
 
 typedef struct {
     int connected_player_id;

@@ -20,7 +20,6 @@ const uint16_t PORT = 5000;
 // How many incoming connections to hold in queue. If the number of pending connections exceeds this, they will be refused
 const int PENDING_CONNECTIONS = 10;
 
-
 typedef struct {
     int player_count;
     PlayerData players[MAX_PLAYER_COUNT];
@@ -30,7 +29,6 @@ typedef struct {
 GameState global_state = {
     .player_count = 0
 };
-
 
 
 void handle_incoming_packet(char* bytes, int player_idx){
@@ -76,11 +74,18 @@ void* connection_handler(void *socket_desc) {
 
     // player starts at (0, 0) pointing right
     PlayerData player_data = {
-        .pos_x = 0,
-        .pos_y = 0,
         .move_dir_x = 1,
-        .move_dir_y = 0
+        .move_dir_y = 0,
+        .length = START_SNAKE_LENGTH
     };
+
+    // player data initialization
+    player_data[0].pos_x = 5;
+    player_data[0].pos_y = 5;
+    for (int i=1; i < START_SNAKE_LENGTH; i++) {
+        player_data.pos[i].x = player_data[i-1].pos[0].x - 1;
+        player_data.pos[i].y = player_data[i-1].pos[0].y;
+    }
 
     global_state.players[global_state.player_count] = player_data;
     global_state.player_count++;
@@ -110,11 +115,17 @@ void* connection_handler(void *socket_desc) {
         // ----- Update board state -----
 
         // move player assigned to this thread
-        int dir_x = global_state.players[player_index].move_dir_x;
-        int dir_y = global_state.players[player_index].move_dir_y;
+        PlayerData* player = &global_state.players[player_index];
+        int dir_x = player->move_dir_x;
+        int dir_y = player->move_dir_y;
 
-        global_state.players[player_index].pos_x += dir_x;
-        global_state.players[player_index].pos_y += dir_y;
+        //update snake segments
+        for (int i=player_data.length; i > 0; i--) {
+        player_data.pos[i].x = player_data[i-1].pos.x;
+        player_data.pos[i].y = player_data[i-1].pos.y;
+        }
+        player->pos[0].x += dir_x;
+        player->pos[0].y += dir_y;
 
         // ----- Send updated game state -----
 

@@ -3,4 +3,8 @@
 
 #define MAX_PLAYER_COUNT 8
 
+#define START_SNAKE_LENGTH 3
+
+#define MAX_SNAKE_LENGTH 100
+
 #endif // CONSTANTS_H_
