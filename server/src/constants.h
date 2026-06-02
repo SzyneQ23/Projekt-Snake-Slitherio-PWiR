@@ -7,4 +7,6 @@
 
 #define MAX_SNAKE_LENGTH 100
 
+#define MAX_NUMBER_OF_FOOD 2
+
 #endif // CONSTANTS_H_

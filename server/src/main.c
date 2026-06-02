@@ -30,6 +30,8 @@ GameState global_state = {
     .player_count = 0
 };
 
+Food food[MAX_NUMBER_OF_FOOD];
+
 
 void handle_incoming_packet(char* bytes, int player_idx){
     NetworkPacket* packet = (NetworkPacket*)bytes;
@@ -72,19 +74,20 @@ void* connection_handler(void *socket_desc) {
     // index of the player assigned to this thread.
     int player_index = global_state.player_count;
 
-    // player starts at (0, 0) pointing right
+    // player starts at (5, 5) pointing right
     PlayerData player_data = {
         .move_dir_x = 1,
         .move_dir_y = 0,
-        .length = START_SNAKE_LENGTH
+        .length = START_SNAKE_LENGTH,
+        .pos[0].x = 5,
+        .pos[0].y = 5,
+        .isAlive = 1
     };
 
-    // player data initialization
-    player_data[0].pos_x = 5;
-    player_data[0].pos_y = 5;
+    // player data initialization (segments)
     for (int i=1; i < START_SNAKE_LENGTH; i++) {
-        player_data.pos[i].x = player_data[i-1].pos[0].x - 1;
-        player_data.pos[i].y = player_data[i-1].pos[0].y;
+        player_data.pos[i].x = player_data.pos[i-1].x - 1;
+        player_data.pos[i].y = player_data.pos[i-1].y;
     }
 
     global_state.players[global_state.player_count] = player_data;
@@ -119,10 +122,28 @@ void* connection_handler(void *socket_desc) {
         int dir_x = player->move_dir_x;
         int dir_y = player->move_dir_y;
 
+        char makeLonger = 0;
+        char destroySnake = 0; 
+
+        //check collision with other snakes
+        for (int i = 0; i < global_state.player_count; i++) {
+            if (player->pos[0].x == global_state.players[i].pos[0].x &&
+                player->pos[0].y == global_state.players[i].pos[0].y)
+                destroySnake = 1;
+        }
+
+        //check collision with food
+        for (int i = 0; i < MAX_NUMBER_OF_FOOD; i++) {
+            if (food[i].isActive == 1 &&
+                player->pos[0].x == food[i].x &&
+                player->pos[0].y == food[i].y)
+                    destroySnake = 1;
+        }
+
         //update snake segments
         for (int i=player_data.length; i > 0; i--) {
-        player_data.pos[i].x = player_data[i-1].pos.x;
-        player_data.pos[i].y = player_data[i-1].pos.y;
+        player_data.pos[i].x = player_data.pos[i-1].x;
+        player_data.pos[i].y = player_data.pos[i-1].y;
         }
         player->pos[0].x += dir_x;
         player->pos[0].y += dir_y;
@@ -174,11 +195,29 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
+    // initialize food
+    if (MAX_NUMBER_OF_FOOD > 0) {
+        food[0].isActive = 1;
+        food[0].x = 6;
+        food[0].y = 7;
+        for (int i = 1; i < MAX_NUMBER_OF_FOOD; i++) {
+            food[i].isActive = 1;
+            food[i].x = (food[i-1].x * 23 + 5) % 7;
+            food[i].y = (food[i-1].y * 41 + 13) % 7;
+        }
+    }
+
+    // test (REMOVE AFTER IMPLEMENTATION IN FRONTEND)
+    for (int i = 0; i < MAX_NUMBER_OF_FOOD; i++) {
+        printf("Food %d is at %d, %d and is %d (active) \n", i, food[i].x, food[i].y, food[i].isActive);
+    }
+    
     printf("Listening for connections...\n");
     for (;;) {
         connfd = accept(socketfd, (struct sockaddr*)NULL, NULL);
         fprintf(stderr, "Connection accepted\n");
         pthread_create(&thread_id, NULL, connection_handler, (void*) &connfd);
+
     }
 }
 
