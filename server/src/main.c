@@ -7,6 +7,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <errno.h>
+#include <time.h>
 
 #include "constants.h"
 #include "network_packets.h"
@@ -143,9 +144,17 @@ void* connection_handler(void *socket_desc) {
         int dir_x = player->move_dir_x;
         int dir_y = player->move_dir_y;
 
-        char makeLonger = 0;
         char destroySnake = 0; 
         int current_board_size = 20 + (global_state.player_count * 4);
+
+         if (player->isAlive == 1) {
+            for (int i = player->length; i > 0; i--) { 
+                player->pos[i].x = player->pos[i-1].x;
+                player->pos[i].y = player->pos[i-1].y;
+            }
+            player->pos[0].x += dir_x;
+            player->pos[0].y += dir_y;
+        }
 
         //check collision with other snakes
         for (int i = 0; i < global_state.player_count; i++) {
@@ -162,8 +171,13 @@ void* connection_handler(void *socket_desc) {
             if (food[i].isActive == 1 && player->pos[0].x == food[i].x && player->pos[0].y == food[i].y) {
                 
                 if (food[i].item_type == 0) {
+                    int old_length = player->length;
                     player->length += 3; // Normalne
                     if (player->length >= MAX_SNAKE_LENGTH) player->length = MAX_SNAKE_LENGTH - 1;
+        
+                    for(int k = old_length; k < player->length; k++) {
+                        player->pos[k] = player->pos[old_length - 1]; 
+                    }
                 } else {
                     destroySnake = 1; // Robaczywe
                 }
@@ -180,11 +194,14 @@ void* connection_handler(void *socket_desc) {
             }
         }
 
-        for (int i = 0; i < MAX_NUMBER_OF_BONUSES; i++) {
+       for (int i = 0; i < MAX_NUMBER_OF_BONUSES; i++) {
             if (bonuses[i].isActive == 1 && player->pos[0].x == bonuses[i].x && player->pos[0].y == bonuses[i].y) {
                 
+                int old_length = player->length;
                 player->length += 1; // Bonus
                 if (player->length >= MAX_SNAKE_LENGTH) player->length = MAX_SNAKE_LENGTH - 1;
+                
+                player->pos[old_length] = player->pos[old_length - 1];
                 
                 int rx, ry;
                 do {
@@ -200,14 +217,6 @@ void* connection_handler(void *socket_desc) {
         //update snake segments
        if (destroySnake == 1) {
             player->isAlive = 0;
-        }
-        if (player->isAlive == 1) {
-            for (int i = player->length; i > 0; i--) { 
-                player->pos[i].x = player->pos[i-1].x;
-                player->pos[i].y = player->pos[i-1].y;
-            }
-            player->pos[0].x += dir_x;
-            player->pos[0].y += dir_y;
         }
 
         // ----- Send updated game state -----
@@ -244,6 +253,7 @@ void* connection_handler(void *socket_desc) {
 
 
 int main(int argc, char *argv[]) {
+    srand(time(NULL));
     int socketfd = 0, connfd = 0;
     struct sockaddr_in serv_addr;
 
