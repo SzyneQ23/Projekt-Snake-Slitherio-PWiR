@@ -8,6 +8,8 @@ enum PacketType {
 	PlayerInputEvent
 }
 
+const MAX_PLAYERS_COUNT = 8
+
 ## Base class for custom data packets transfered over the network
 @abstract
 class BaseNetworkPacket extends RefCounted:
@@ -28,9 +30,16 @@ class BaseNetworkPacket extends RefCounted:
 class PlayerData extends RefCounted:
 	var position: Vector2i
 	var direction: Vector2i
-	func _init(pos_x: int, pos_y: int, dir_x: int, dir_y: int) -> void:
+	var length: int
+	var alive: int
+	var segments: Array[Vector2i] = []
+
+	func _init(pos_x: int, pos_y: int, dir_x: int, dir_y: int, l: int, segs: Array[Vector2i], is_alive: bool) -> void:
 		self.position = Vector2i(pos_x, pos_y)
 		self.direction = Vector2i(dir_x, dir_y)
+		self.length = l
+		self.alive = is_alive
+		self.segments = segs
 
 ## Information about current board state, sent periodically by the server
 class GameDataPacket extends BaseNetworkPacket:
@@ -45,16 +54,33 @@ class GameDataPacket extends BaseNetworkPacket:
 	func from_bytes(bytes: PackedByteArray):
 		self.current_player_id = bytes.decode_s32(0)
 		self.player_count = bytes.decode_s32(4)
-		bytes = bytes.slice(8)
+
+		var offset = 8;
 				
-		for i in range(player_count):
-			var pos_x = bytes.decode_s32(0)
-			var pos_y = bytes.decode_s32(4)
-			var dir_x = bytes.decode_s32(8)
-			var dir_y = bytes.decode_s32(12)
-			bytes = bytes.slice(16)
-			
-			self.players.append(PlayerData.new(pos_x, pos_y, dir_x, dir_y))
+		for i in range(MAX_PLAYERS_COUNT): # for each player
+			var alive = bytes.decode_u8(offset) == 1
+			var length = bytes.decode_s32(offset + 4)
+
+			var segments: Array[Vector2i] = []
+			var segments_offset = offset + 8
+
+			for j in range(100):
+				var pos_x = bytes.decode_s32(segments_offset + (j * 8))
+				var pos_y = bytes.decode_s32(segments_offset + (j * 8) + 4)
+				segments.append(Vector2i(pos_x, pos_y))
+
+			var dir_x = bytes.decode_s32(offset + 808)
+			var dir_y = bytes.decode_s32(offset + 812)
+
+			var pos_x = segments[0].x
+			var pos_y = segments[0].y
+
+			if i < self.player_count:
+				self.players.append(PlayerData.new(pos_x, pos_y, dir_x, dir_y, length, segments, alive))
+				print("Position x:",pos_x)
+				print("Position y:",pos_y)
+
+			offset += 816
 	
 	func into_bytes() -> PackedByteArray:
 		return []

@@ -79,8 +79,8 @@ void* connection_handler(void *socket_desc) {
         .move_dir_x = 1,
         .move_dir_y = 0,
         .length = START_SNAKE_LENGTH,
-        .pos[0].x = 5,
-        .pos[0].y = 5,
+        .pos[0].x = 15,
+        .pos[0].y = 15,
         .isAlive = 1
     };
 
@@ -89,7 +89,7 @@ void* connection_handler(void *socket_desc) {
         player_data.pos[i].x = player_data.pos[i-1].x - 1;
         player_data.pos[i].y = player_data.pos[i-1].y;
     }
-
+    
     global_state.players[global_state.player_count] = player_data;
     global_state.player_count++;
 
@@ -123,7 +123,24 @@ void* connection_handler(void *socket_desc) {
         int dir_y = player->move_dir_y;
 
         char makeLonger = 0;
-        char destroySnake = 0; 
+        char destroySnake = 0;
+        
+        int next_head_x = player->pos[0].x + dir_x;
+        int next_head_y = player->pos[0].y + dir_y;
+
+        //check collision with food
+        for (int i = 0; i < MAX_NUMBER_OF_FOOD; i++) {
+            if (food[i].isActive == 1 &&
+                next_head_x == food[i].x &&
+                next_head_y == food[i].y) {
+                    makeLonger = 1;
+                    food[i].isActive = 0;
+                    food[i].x = (food[i].x * 23 + 5) % 7;
+                    food[i].y = (food[i].y * 41 + 13) % 7;
+                    food[i].isActive = 1;
+                    break;
+            }
+        }
 
         //check collision with other snakes
         for (int i = 0; i < global_state.player_count; i++) {
@@ -132,21 +149,15 @@ void* connection_handler(void *socket_desc) {
                 destroySnake = 1;
         }
 
-        //check collision with food
-        for (int i = 0; i < MAX_NUMBER_OF_FOOD; i++) {
-            if (food[i].isActive == 1 &&
-                player->pos[0].x == food[i].x &&
-                player->pos[0].y == food[i].y)
-                    destroySnake = 1;
-        }
+        
 
         //update snake segments
-        for (int i=player_data.length; i > 0; i--) {
-        player_data.pos[i].x = player_data.pos[i-1].x;
-        player_data.pos[i].y = player_data.pos[i-1].y;
+        for (int i=player->length - 1; i > 0; i--) {
+        player->pos[i].x = player->pos[i-1].x;
+        player->pos[i].y = player->pos[i-1].y;
         }
-        player->pos[0].x += dir_x;
-        player->pos[0].y += dir_y;
+        player->pos[0].x = next_head_x;
+        player->pos[0].y = next_head_y;
 
         // ----- Send updated game state -----
 
@@ -211,6 +222,14 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < MAX_NUMBER_OF_FOOD; i++) {
         printf("Food %d is at %d, %d and is %d (active) \n", i, food[i].x, food[i].y, food[i].isActive);
     }
+    
+    printf("=== KONTROLA ROZMIARU STRUKTUR ===\n");
+    printf("Rozmiar Position: %zu bajtow\n", sizeof(Position));
+    printf("Rozmiar Food: %zu bajtow\n", sizeof(Food));
+    printf("Rozmiar PlayerData: %zu bajtow\n", sizeof(PlayerData));
+    printf("Rozmiar GameDataPacket: %zu bajtow\n", sizeof(GameDataPacket));
+    printf("Rozmiar NetworkPacket (CALY PAKIET): %zu bajtow\n", sizeof(NetworkPacket));
+    printf("==================================\n");
     
     printf("Listening for connections...\n");
     for (;;) {

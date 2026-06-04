@@ -20,11 +20,11 @@ typedef struct {
 } Food;
 
 typedef struct {
+    char isAlive;
+    int length;
+    Position pos[MAX_SNAKE_LENGTH];
     int move_dir_x;
     int move_dir_y;
-    Position pos[MAX_SNAKE_LENGTH];
-    int length;
-    char isAlive;
 } PlayerData;
 
 
