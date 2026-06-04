@@ -3,4 +3,12 @@
 
 #define MAX_PLAYER_COUNT 8
 
+#define START_SNAKE_LENGTH 3
+
+#define MAX_SNAKE_LENGTH 100
+
+#define MAX_NUMBER_OF_FOOD 2
+
+#define MAX_NUMBER_OF_BONUSES 5
+
 #endif // CONSTANTS_H_

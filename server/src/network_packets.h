@@ -9,18 +9,42 @@ typedef enum {
 } PacketType;
 
 typedef struct {
-    int pos_x;
-    int pos_y;
+      int x;
+      int y;  
+} Position;
+
+typedef struct { 
+    int x; 
+    int y; 
+    char isActive; 
+    char item_type; 
+} Food;
+
+typedef struct {
+    int x;
+    int y;
+    char isActive;
+} BonusItem;
+
+typedef struct {
     int move_dir_x;
     int move_dir_y;
+    Position pos[MAX_SNAKE_LENGTH];
+    int length;
+    char isAlive;
 } PlayerData;
+
 
 typedef struct {
     int connected_player_id;
-
     int player_count;
-    PlayerData players[MAX_PLAYER_COUNT];
 
+    int board_width;
+    int board_height;
+
+    PlayerData players[MAX_PLAYER_COUNT];
+    Food food[MAX_NUMBER_OF_FOOD];
+    BonusItem bonuses[MAX_NUMBER_OF_BONUSES];
 } GameDataPacket;
 
 

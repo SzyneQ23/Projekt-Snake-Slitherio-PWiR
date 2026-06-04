@@ -1,0 +1,45 @@
+[gd_scene format=3 uid="uid://mxfjppnxfr46"]
+
+[ext_resource type="Texture2D" uid="uid://c1vwxmhvq265m" path="res://assets/Jabłko_Klatka_1.png" id="1_bpq8q"]
+[ext_resource type="Texture2D" uid="uid://byddftjbq1ydf" path="res://assets/Jabłko_Klatka_2.png" id="2_o1f1w"]
+[ext_resource type="Texture2D" uid="uid://bbvmjccabp8ln" path="res://assets/Jabłko_Klatka_3.png" id="3_3l3tj"]
+[ext_resource type="Texture2D" uid="uid://dvaejytccf68j" path="res://assets/Jabłko_Klatka_4.png" id="4_8n2ub"]
+[ext_resource type="Texture2D" uid="uid://dbukbksn40ynk" path="res://assets/Jabłko_Klatka_5.png" id="5_yj07a"]
+[ext_resource type="Texture2D" uid="uid://bosd7uuoai8au" path="res://assets/Jabłko_Klatka_6 1.png" id="6_150bd"]
+[ext_resource type="Texture2D" uid="uid://caokjmq4fxq5a" path="res://assets/Jabłko_Klatka_7 1.png" id="7_nbawf"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_frhxr"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_bpq8q")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_o1f1w")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_3l3tj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_8n2ub")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_yj07a")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_150bd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_nbawf")
+}],
+"loop": true,
+"name": &"default",
+"speed": 7.0
+}]
+
+[node name="Apple" type="Node2D" unique_id=617098167]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=760153599]
+sprite_frames = SubResource("SpriteFrames_frhxr")
+autoplay = "default"
+frame_progress = 0.4158966
