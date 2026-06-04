@@ -1,9 +1,183 @@
 [gd_scene format=3 uid="uid://comy6o46nsrfg"]
 
 [ext_resource type="Texture2D" uid="uid://remhsqkyhrr8" path="res://assets/Grafika_bez_nazwy 5.png" id="1_1sg3p"]
+[ext_resource type="Texture2D" uid="uid://dqgigafm1kb8m" path="res://assets/Grafika_bez_nazwy.png" id="1_7ny8m"]
+[ext_resource type="Texture2D" uid="uid://d05ynetsfndfm" path="res://assets/Grafika_bez_nazwy 6.png" id="3_wdyqj"]
+[ext_resource type="Texture2D" uid="uid://di8gan06jp5n3" path="res://assets/Grafika_bez_nazwy 1.png" id="4_43rbr"]
+[ext_resource type="Texture2D" uid="uid://cuiriqbo0ypl" path="res://assets/Naroznik_2 1.png" id="5_8gqko"]
+[ext_resource type="Texture2D" uid="uid://c411lmibjve0j" path="res://assets/Naroznik_1.png" id="6_x8x5d"]
+[ext_resource type="Texture2D" uid="uid://bqt3s5xr4bmnm" path="res://assets/Naroznik_1 3.png" id="7_4p645"]
+[ext_resource type="Texture2D" uid="uid://cfp3yf8d1svau" path="res://assets/Naroznik_2 3.png" id="8_f8077"]
+[ext_resource type="Texture2D" uid="uid://cv3u0yw60wqru" path="res://assets/Naroznik_2.png" id="9_r1xau"]
+[ext_resource type="Texture2D" uid="uid://bq74ihveh1s7r" path="res://assets/Naroznik_1 1.png" id="10_nrvw1"]
+[ext_resource type="Texture2D" uid="uid://cxe1hxkxha8f0" path="res://assets/Naroznik_1 2.png" id="11_lknij"]
+[ext_resource type="Texture2D" uid="uid://4vx44gyr78wi" path="res://assets/Naroznik_2 2.png" id="12_odlxw"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_pou51"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_7ny8m")
+}],
+"loop": true,
+"name": &"body_A",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_1sg3p")
+}],
+"loop": true,
+"name": &"body_B",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_wdyqj")
+}],
+"loop": true,
+"name": &"tail_A",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_43rbr")
+}],
+"loop": true,
+"name": &"tail_B",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_8gqko")
+}],
+"loop": true,
+"name": &"turn_A_down_to_left",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("6_x8x5d")
+}],
+"loop": true,
+"name": &"turn_A_down_to_right",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("7_4p645")
+}],
+"loop": true,
+"name": &"turn_A_left_to_down",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("8_f8077")
+}],
+"loop": true,
+"name": &"turn_A_left_to_up",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_r1xau")
+}],
+"loop": true,
+"name": &"turn_A_right_to_down",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("10_nrvw1")
+}],
+"loop": true,
+"name": &"turn_A_right_to_up",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("11_lknij")
+}],
+"loop": true,
+"name": &"turn_A_up_to_left",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("12_odlxw")
+}],
+"loop": true,
+"name": &"turn_A_up_to_right",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("10_nrvw1")
+}],
+"loop": true,
+"name": &"turn_B_down_to_left",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("8_f8077")
+}],
+"loop": true,
+"name": &"turn_B_down_to_right",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("12_odlxw")
+}],
+"loop": true,
+"name": &"turn_B_left_to_down",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("6_x8x5d")
+}],
+"loop": true,
+"name": &"turn_B_left_to_up",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("11_lknij")
+}],
+"loop": true,
+"name": &"turn_B_right_to_down",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_8gqko")
+}],
+"loop": true,
+"name": &"turn_B_right_to_up",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_r1xau")
+}],
+"loop": true,
+"name": &"turn_B_up_to_left",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("7_4p645")
+}],
+"loop": true,
+"name": &"turn_B_up_to_right",
+"speed": 0.0
+}]
 
 [node name="SnakeSegment" type="Node2D" unique_id=704606195]
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2632133]
-texture = ExtResource("1_1sg3p")
-centered = false
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1456577907]
+sprite_frames = SubResource("SpriteFrames_pou51")
+animation = &"turn_B_up_to_left"

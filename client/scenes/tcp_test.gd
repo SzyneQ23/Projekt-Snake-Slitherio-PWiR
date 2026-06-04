@@ -1,6 +1,6 @@
 extends Node2D
 
-@onready var test_player: Sprite2D = $TestPlayer1
+@onready var test_player: AnimatedSprite2D = $TestPlayer1
 @onready var test_player2: Sprite2D = $TestPlayer2
 @onready var connect_button: Button = $UI/ConnectButton
 @onready var tcp_client: TcpClient = TcpClientInstance
@@ -22,6 +22,24 @@ var food_slots: Array[Dictionary] = []
 var active_bonuses: Array[Node2D] = []
 var segment_scene = preload("res://scenes/snake_segment.tscn")
 var player_segments = [[], [], [], [], [], [], [], []] 
+
+var last_directions: Array[Vector2i] = [Vector2i(1,0), Vector2i(1,0), Vector2i(1,0), Vector2i(1,0), Vector2i(1,0), Vector2i(1,0), Vector2i(1,0), Vector2i(1,0)]
+var local_player_index: int = -1
+
+
+func get_segment_type(index: int) -> int:
+	return index % 2
+	
+func get_turn_name(v_in: Vector2i, v_out: Vector2i) -> String:
+	if v_in.x == 1 and v_out.y == -1: return "right_to_up"
+	if v_in.x == 1 and v_out.y == 1: return "right_to_down"
+	if v_in.x == -1 and v_out.y == -1: return "left_to_up"
+	if v_in.x == -1 and v_out.y == 1: return "left_to_down"
+	if v_in.y == -1 and v_out.x == 1: return "up_to_right"
+	if v_in.y == -1 and v_out.x == -1: return "up_to_left"
+	if v_in.y == 1 and v_out.x == 1: return "down_to_right"
+	if v_in.y == 1 and v_out.x == -1: return "down_to_left"
+	return "straight"
 
 func _ready() -> void:
 	for player_node in player_nodes:
@@ -56,23 +74,38 @@ func _on_button_pressed():
 
 
 func _process(delta: float) -> void:
-	# Get player input and send an input event packet to the server
 	var input_packet: NetworkPacket.InputEventPacket = null
+	var next_dir = Vector2i.ZERO
+	
 	if Input.is_action_just_pressed("ui_left"):
 		input_packet = NetworkPacket.InputEventPacket.new(NetworkPacket.InputType.Left)
+		next_dir = Vector2i(-1, 0)
 	elif Input.is_action_just_pressed("ui_right"):
 		input_packet = NetworkPacket.InputEventPacket.new(NetworkPacket.InputType.Right)
+		next_dir = Vector2i(1, 0)
 	elif Input.is_action_just_pressed("ui_up"):
 		input_packet = NetworkPacket.InputEventPacket.new(NetworkPacket.InputType.Up)
+		next_dir = Vector2i(0, -1)
 	elif Input.is_action_just_pressed("ui_down"):
 		input_packet = NetworkPacket.InputEventPacket.new(NetworkPacket.InputType.Down)
+		next_dir = Vector2i(0, 1)
 	
 	if input_packet != null:
 		TcpClientInstance.send_packet(input_packet)
+		if local_player_index >= 0 and local_player_index < len(player_nodes):
+			var current_dir = last_directions[local_player_index] 
+			var head = player_nodes[local_player_index] as AnimatedSprite2D 
+			
+			if head and next_dir != Vector2i.ZERO and next_dir != current_dir:
+				var cross = current_dir.x * next_dir.y - current_dir.y * next_dir.x
+				if cross == -1: head.play("head_turn_left")
+				else: head.play("head_turn_right")
+				head.rotation = get_rotation_for_dir(current_dir)
 	
 
 func _on_packet_received(packet: NetworkPacket.GameDataPacket):
 	$UI/PlayerIDLabel.text = "Player %d" % (packet.current_player_id + 1)
+	local_player_index = packet.current_player_id
 	
 	if packet.board_width != current_board_w or packet.board_height != current_board_h:
 		current_board_w = packet.board_width
@@ -89,13 +122,20 @@ func _on_packet_received(packet: NetworkPacket.GameDataPacket):
 			if i < len(player_nodes): player_nodes[i].hide()
 			for seg in segments_array: seg.hide()
 			continue
-			
+		
 		if not player_nodes[i].visible:
 			player_nodes[i].show()
-		player_nodes[i].position = p_data.positions[0] * 32
+		
+		player_nodes[i].position = (p_data.positions[0] * 32) + Vector2i(16, 16)
+		player_nodes[i].z_index = 5
+		
+		var head = player_nodes[i] as AnimatedSprite2D
+		if head:
+			head.play("head_straight")
+			head.rotation = get_rotation_for_dir(p_data.direction)
+			last_directions[i] = p_data.direction
 
 		var body_length = p_data.length - 1
-		
 		while len(segments_array) < body_length:
 			var new_seg = segment_scene.instantiate()
 			new_seg.z_index = 4 
@@ -105,9 +145,38 @@ func _on_packet_received(packet: NetworkPacket.GameDataPacket):
 		for j in range(len(segments_array)):
 			if j < body_length:
 				segments_array[j].show()
-				segments_array[j].position = p_data.positions[j + 1] * 32
+				segments_array[j].position = (p_data.positions[j + 1] * 32) + Vector2i(16, 16)
+				
+				var seg_sprite = segments_array[j].get_node("AnimatedSprite2D")
+				if seg_sprite:
+					var type_suffix = "_A" if j % 2 == 0 else "_B"
+					
+					var pos_next = p_data.positions[j]    
+					var pos_curr = p_data.positions[j + 1] 
+					
+					if j == body_length - 1:
+						seg_sprite.play("tail" + type_suffix)
+						var vec_to_head = pos_next - pos_curr
+						
+						var search_idx = j
+						while vec_to_head == Vector2i.ZERO and search_idx > 0:
+							search_idx -= 1
+							vec_to_head = p_data.positions[search_idx] - p_data.positions[search_idx + 1]
+						seg_sprite.rotation = get_rotation_for_dir(vec_to_head)
+					else:
+						var pos_prev = p_data.positions[j + 2] 
+						
+						var vec_in = pos_curr - pos_prev 
+						var vec_out = pos_next - pos_curr
+						
+						if vec_in != vec_out:
+							seg_sprite.rotation = 0 
+							seg_sprite.play("turn" + type_suffix + "_" + get_turn_name(vec_in, vec_out))
+						else:
+							seg_sprite.rotation = get_rotation_for_dir(vec_out)
+							seg_sprite.play("body" + type_suffix)
 			else:
-				segments_array[j].hide() 
+				segments_array[j].hide()
 	
 	for i in range(len(food_slots)):
 		if i < len(packet.foods):
@@ -187,3 +256,10 @@ func rebuild_board(w: int, h: int):
 					tm.set_cell(Vector2i(x, y), podloga_a_source, podloga_a_atlas)
 				else:
 					tm.set_cell(Vector2i(x, y), podloga_b_source, podloga_b_atlas)
+					
+func get_rotation_for_dir(vec: Vector2i) -> float:
+	if vec == Vector2i(1, 0): return 0.0          # W prawo (brak obrotu)
+	if vec == Vector2i(-1, 0): return PI          # W lewo (obrót o 180 stopni)
+	if vec == Vector2i(0, -1): return -PI / 2.0   # W górę (obrót o -90 stopni)
+	if vec == Vector2i(0, 1): return PI / 2.0     # W dół (obrót o 90 stopni)
+	return 0.0
