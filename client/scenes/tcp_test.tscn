@@ -1,7 +1,80 @@
 [gd_scene format=3 uid="uid://dhfd22yok5bdl"]
 
 [ext_resource type="Script" uid="uid://dqaspabfyrcjo" path="res://scenes/tcp_test.gd" id="1_m2txu"]
+[ext_resource type="Texture2D" uid="uid://bayd65jdva7e8" path="res://assets/Mur_Dol.png" id="3_lakwm"]
 [ext_resource type="Texture2D" uid="uid://dwxpkyuyq0axa" path="res://assets/snake.jpg" id="3_txiec"]
+[ext_resource type="Texture2D" uid="uid://c6mtetg2re4lv" path="res://assets/Mur_Gora.png" id="4_q0kb5"]
+[ext_resource type="Texture2D" uid="uid://cia14kdr36tfh" path="res://assets/Mur_Lewo.png" id="5_bjufg"]
+[ext_resource type="Texture2D" uid="uid://kuax4u0d33xb" path="res://assets/Mur_Prawo.png" id="6_daxcd"]
+[ext_resource type="Texture2D" uid="uid://dm5y863tk1iyo" path="res://assets/Naroznik_Lewy_Dolny.png" id="7_sgbnt"]
+[ext_resource type="Texture2D" uid="uid://cr16hu42tu5e8" path="res://assets/Naroznik_Lewy_Gorny.png" id="8_chght"]
+[ext_resource type="Texture2D" uid="uid://c2socwmdj3ywu" path="res://assets/Naroznik_Prawy_Dolny.png" id="9_r72fd"]
+[ext_resource type="Texture2D" uid="uid://dq7knvrcyumoh" path="res://assets/Naroznik_Prawy_Gorny.png" id="10_lghs7"]
+[ext_resource type="Texture2D" uid="uid://dven67apge6wa" path="res://assets/Podloga_1.png" id="11_6wlcr"]
+[ext_resource type="Texture2D" uid="uid://bxpelkr2lbp0g" path="res://assets/Podloga_2.png" id="12_xejdl"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lakwm"]
+texture = ExtResource("3_lakwm")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_q0kb5"]
+texture = ExtResource("4_q0kb5")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_bjufg"]
+texture = ExtResource("5_bjufg")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_daxcd"]
+texture = ExtResource("6_daxcd")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_sgbnt"]
+texture = ExtResource("7_sgbnt")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_chght"]
+texture = ExtResource("8_chght")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_r72fd"]
+texture = ExtResource("9_r72fd")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lghs7"]
+texture = ExtResource("10_lghs7")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6wlcr"]
+texture = ExtResource("11_6wlcr")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_xejdl"]
+texture = ExtResource("12_xejdl")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_s00y6"]
+tile_size = Vector2i(32, 32)
+sources/10 = SubResource("TileSetAtlasSource_lakwm")
+sources/11 = SubResource("TileSetAtlasSource_q0kb5")
+sources/12 = SubResource("TileSetAtlasSource_bjufg")
+sources/13 = SubResource("TileSetAtlasSource_daxcd")
+sources/14 = SubResource("TileSetAtlasSource_sgbnt")
+sources/15 = SubResource("TileSetAtlasSource_chght")
+sources/16 = SubResource("TileSetAtlasSource_r72fd")
+sources/17 = SubResource("TileSetAtlasSource_lghs7")
+sources/18 = SubResource("TileSetAtlasSource_6wlcr")
+sources/19 = SubResource("TileSetAtlasSource_xejdl")
 
 [node name="TCP Test" type="Node2D" unique_id=1033222761]
 script = ExtResource("1_m2txu")
@@ -78,3 +151,11 @@ offset_left = -40.0
 offset_bottom = 23.0
 grow_horizontal = 0
 theme_override_font_sizes/font_size = 24
+
+[node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=2112907138]
+tile_set = SubResource("TileSet_s00y6")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=2140201653]
+
+[node name="TileMapLayer2" type="TileMapLayer" parent="." unique_id=554408612]
+tile_set = SubResource("TileSet_s00y6")

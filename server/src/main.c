@@ -31,6 +31,27 @@ GameState global_state = {
 };
 
 Food food[MAX_NUMBER_OF_FOOD];
+BonusItem bonuses[MAX_NUMBER_OF_BONUSES];
+
+int is_position_free(int target_x, int target_y) {
+    for (int i = 0; i < MAX_NUMBER_OF_FOOD; i++) {
+        if (food[i].isActive == 1 && food[i].x == target_x && food[i].y == target_y) return 0;
+    }
+
+    for (int i = 0; i < MAX_NUMBER_OF_BONUSES; i++) {
+        if (bonuses[i].isActive == 1 && bonuses[i].x == target_x && bonuses[i].y == target_y) return 0;
+    }
+    // --------------------------------
+    
+    for (int i = 0; i < global_state.player_count; i++) {
+        if (global_state.players[i].isAlive == 1) {
+            for(int j = 0; j < global_state.players[i].length; j++) {
+                if (global_state.players[i].pos[j].x == target_x && global_state.players[i].pos[j].y == target_y) return 0;
+            }
+        }
+    }
+    return 1;
+}
 
 
 void handle_incoming_packet(char* bytes, int player_idx){
@@ -124,37 +145,83 @@ void* connection_handler(void *socket_desc) {
 
         char makeLonger = 0;
         char destroySnake = 0; 
+        int current_board_size = 20 + (global_state.player_count * 4);
 
         //check collision with other snakes
         for (int i = 0; i < global_state.player_count; i++) {
-            if (player->pos[0].x == global_state.players[i].pos[0].x &&
-                player->pos[0].y == global_state.players[i].pos[0].y)
+            if (i != player_index && 
+                player->pos[0].x == global_state.players[i].pos[0].x &&
+                player->pos[0].y == global_state.players[i].pos[0].y) {
+                
                 destroySnake = 1;
+            }
         }
 
         //check collision with food
         for (int i = 0; i < MAX_NUMBER_OF_FOOD; i++) {
-            if (food[i].isActive == 1 &&
-                player->pos[0].x == food[i].x &&
-                player->pos[0].y == food[i].y)
-                    destroySnake = 1;
+            if (food[i].isActive == 1 && player->pos[0].x == food[i].x && player->pos[0].y == food[i].y) {
+                
+                if (food[i].item_type == 0) {
+                    player->length += 3; // Normalne
+                    if (player->length >= MAX_SNAKE_LENGTH) player->length = MAX_SNAKE_LENGTH - 1;
+                } else {
+                    destroySnake = 1; // Robaczywe
+                }
+                
+                int rx, ry;
+                do {
+                    rx = rand() % current_board_size;
+                    ry = rand() % current_board_size;
+                } while (is_position_free(rx, ry) == 0);
+                
+                food[i].x = rx;
+                food[i].y = ry;
+                food[i].item_type = rand() % 2;
+            }
+        }
+
+        for (int i = 0; i < MAX_NUMBER_OF_BONUSES; i++) {
+            if (bonuses[i].isActive == 1 && player->pos[0].x == bonuses[i].x && player->pos[0].y == bonuses[i].y) {
+                
+                player->length += 1; // Bonus
+                if (player->length >= MAX_SNAKE_LENGTH) player->length = MAX_SNAKE_LENGTH - 1;
+                
+                int rx, ry;
+                do {
+                    rx = rand() % current_board_size;
+                    ry = rand() % current_board_size;
+                } while (is_position_free(rx, ry) == 0);
+                
+                bonuses[i].x = rx;
+                bonuses[i].y = ry;
+            }
         }
 
         //update snake segments
-        for (int i=player_data.length; i > 0; i--) {
-        player_data.pos[i].x = player_data.pos[i-1].x;
-        player_data.pos[i].y = player_data.pos[i-1].y;
+       if (destroySnake == 1) {
+            player->isAlive = 0;
         }
-        player->pos[0].x += dir_x;
-        player->pos[0].y += dir_y;
+        if (player->isAlive == 1) {
+            for (int i = player->length; i > 0; i--) { 
+                player->pos[i].x = player->pos[i-1].x;
+                player->pos[i].y = player->pos[i-1].y;
+            }
+            player->pos[0].x += dir_x;
+            player->pos[0].y += dir_y;
+        }
 
         // ----- Send updated game state -----
 
         GameDataPacket game_data_packet = {
             .connected_player_id = player_index,
             .player_count = global_state.player_count,
+
+            .board_width = current_board_size,
+            .board_height = current_board_size
         };
         memcpy(game_data_packet.players, global_state.players, sizeof(global_state.players));
+        memcpy(game_data_packet.food, food, sizeof(food));
+        memcpy(game_data_packet.bonuses, bonuses, sizeof(bonuses));
 
         NetworkPacket packet = {
             .size = sizeof(NetworkPacket),
@@ -172,6 +239,8 @@ void* connection_handler(void *socket_desc) {
     close(sock);
     pthread_exit(NULL);
 }
+
+
 
 
 int main(int argc, char *argv[]) {
@@ -196,15 +265,18 @@ int main(int argc, char *argv[]) {
     }
 
     // initialize food
-    if (MAX_NUMBER_OF_FOOD > 0) {
-        food[0].isActive = 1;
-        food[0].x = 6;
-        food[0].y = 7;
-        for (int i = 1; i < MAX_NUMBER_OF_FOOD; i++) {
-            food[i].isActive = 1;
-            food[i].x = (food[i-1].x * 23 + 5) % 7;
-            food[i].y = (food[i-1].y * 41 + 13) % 7;
-        }
+    for (int i = 0; i < MAX_NUMBER_OF_FOOD; i++) {
+        food[i].x = rand() % 20;
+        food[i].y = rand() % 20;
+        food[i].isActive = 1;
+        food[i].item_type = rand() % 2; // Losuje 0 lub 1
+    }
+
+    // initialize bonuses
+    for (int i = 0; i < MAX_NUMBER_OF_BONUSES; i++) {
+        bonuses[i].x = rand() % 20;
+        bonuses[i].y = rand() % 20;
+        bonuses[i].isActive = 1;
     }
 
     // test (REMOVE AFTER IMPLEMENTATION IN FRONTEND)
