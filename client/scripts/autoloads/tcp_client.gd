@@ -7,8 +7,6 @@ signal packet_received(packet:NetworkPacket.BaseNetworkPacket)
 signal disconnected
 signal connected
 
-
-# TODO: Ideally these would be pulled from something like a .env file and not hard-coded
 var HOST_ADDRESS = "127.0.0.1"
 const HOST_PORT = 5000
 
@@ -22,7 +20,8 @@ func is_connected_to_server() -> bool:
 
 func connect_to_host(ip:String) -> bool:
 	HOST_ADDRESS = ip
-	if peer_status == stream_peer.STATUS_CONNECTED:
+	
+	if stream_peer != null and peer_status == StreamPeerSocket.Status.STATUS_CONNECTED:
 		print_debug("Server connection already established")
 		return true
 	
@@ -33,8 +32,6 @@ func connect_to_host(ip:String) -> bool:
 		push_error("Couldn't resolve host")
 		return false
 	
-	
-	# Actively wait while client is trying to establish a connection
 	while stream_peer.get_status() == stream_peer.STATUS_CONNECTING:
 		stream_peer.poll()
 	
@@ -47,9 +44,15 @@ func connect_to_host(ip:String) -> bool:
 	connected.emit()
 	return true
 
+func disconnect_from_host() -> void:
+	if stream_peer != null:
+		stream_peer.disconnect_from_host()
+		peer_status = StreamPeerSocket.Status.STATUS_NONE
+		print_debug("Manually disconnected from host.")
+
 func send_packet(packet: NetworkPacket.BaseNetworkPacket):
-	if stream_peer.get_status() != StreamPeerSocket.Status.STATUS_CONNECTED:
-		print(stream_peer.get_status())
+	if stream_peer == null or stream_peer.get_status() != StreamPeerSocket.Status.STATUS_CONNECTED:
+		print(peer_status)
 		push_error("Tried to send a packet but connection is not established")
 		return
 	
@@ -64,7 +67,6 @@ func _process(delta: float) -> void:
 	stream_peer.poll()
 	var new_status = stream_peer.get_status()
 	
-	# Handle connection status changes
 	if new_status != peer_status:
 		if new_status == StreamPeerSocket.Status.STATUS_ERROR:
 			push_error("ERROR: Connection error")
@@ -76,20 +78,16 @@ func _process(delta: float) -> void:
 			queue_free()
 		peer_status = new_status
 	
-	
 	if new_status != stream_peer.STATUS_CONNECTED:
 		return
 	
 	var received_bytes: int = stream_peer.get_available_bytes()
 	if received_bytes == 0: return
 	
-	# First value in a transmited packet specifies its size
 	var packet_size: int = stream_peer.get_32()
-	
 	received_bytes = stream_peer.get_available_bytes()
 	
-	# Handle the case where expected network packet doesn't fit into a single TCP packet - wait for the rest of it
-	while received_bytes < packet_size - 4: # -4 because we already read 4 bytes from the TCP stream
+	while received_bytes < packet_size - 4:
 		stream_peer.poll()
 		received_bytes = stream_peer.get_available_bytes()
 	
@@ -99,7 +97,7 @@ func _process(delta: float) -> void:
 		return
 	var bytes: PackedByteArray = packet_bytes[1]
 		
-	var packet:NetworkPacket.BaseNetworkPacket = NetworkPacket.read_packet(bytes) # we already read 4 bytes to get the packet_size
+	var packet:NetworkPacket.BaseNetworkPacket = NetworkPacket.read_packet(bytes)
 	
 	if packet == null:
 		push_error("Couldn't parse received packet")
