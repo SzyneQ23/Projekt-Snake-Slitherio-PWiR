@@ -1,16 +1,12 @@
 extends Node2D
 
-@onready var test_player: AnimatedSprite2D = $TestPlayer1
-@onready var test_player2: Sprite2D = $TestPlayer2
 @onready var connect_button: Button = $UI/ConnectButton
 @onready var tcp_client: TcpClient = TcpClientInstance
 
-@onready var player_nodes = [
-	$TestPlayer1,
-	$TestPlayer2,
-	$TestPlayer3,
-	$TestPlayer4
-]
+const MAX_PLAYER_COUNT = 8
+@onready var player_nodes = []
+
+var player_scene = preload("res://scenes/prefab_player.tscn")
 
 var current_board_w = 0
 var current_board_h = 0
@@ -42,9 +38,7 @@ func get_turn_name(v_in: Vector2i, v_out: Vector2i) -> String:
 	return "straight"
 
 func _ready() -> void:
-	for player_node in player_nodes:
-		player_node.hide()
-		
+	player_nodes.resize(MAX_PLAYER_COUNT)
 	for i in range(2):
 		var normal = normal_apple_scene.instantiate()
 		var wormy = wormy_apple_scene.instantiate()
@@ -114,9 +108,16 @@ func _on_packet_received(packet: NetworkPacket.GameDataPacket):
 		
 	if packet.player_count == 0:
 		return
+	
 	for i in range(len(packet.players)):
 		var p_data = packet.players[i]
 		var segments_array = player_segments[i]
+		
+		if player_nodes[i] == null:
+			var new_player: AnimatedSprite2D = player_scene.instantiate()
+			new_player.show()
+			add_child(new_player)
+			player_nodes[i] = new_player 
 		
 		if not p_data.is_alive:
 			if i < len(player_nodes): player_nodes[i].hide()
@@ -204,9 +205,11 @@ func _on_packet_received(packet: NetworkPacket.GameDataPacket):
 
 func _on_connected():
 	connect_button.hide()
+	
 
 func _on_disconnected():
-	test_player.queue_free()
+	pass
+	# test_player.queue_free()
 	
 func rebuild_board(w: int, h: int):
 	if not has_node("TileMapLayer"): 
