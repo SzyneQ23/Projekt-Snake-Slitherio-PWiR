@@ -1,16 +1,11 @@
 extends Node2D
 
-@onready var test_player: AnimatedSprite2D = $TestPlayer1
-@onready var test_player2: Sprite2D = $TestPlayer2
 @onready var connect_button: Button = $UI/ConnectButton
 @onready var tcp_client: TcpClient = TcpClientInstance
 
-@onready var player_nodes = [
-	$TestPlayer1,
-	$TestPlayer2,
-	$TestPlayer3,
-	$TestPlayer4
-]
+@onready var player_nodes = []
+
+var player_scene = preload("res://scenes/prefab_player.tscn")
 
 var current_board_w = 0
 var current_board_h = 0
@@ -42,9 +37,7 @@ func get_turn_name(v_in: Vector2i, v_out: Vector2i) -> String:
 	return "straight"
 
 func _ready() -> void:
-	for player_node in player_nodes:
-		player_node.hide()
-		
+	player_nodes.resize(TcpClient.MAX_PLAYER_COUNT)
 	for i in range(2):
 		var normal = normal_apple_scene.instantiate()
 		var wormy = wormy_apple_scene.instantiate()
@@ -70,7 +63,7 @@ func _ready() -> void:
 	tcp_client.disconnected.connect(_on_disconnected)
 
 func _on_button_pressed():
-	tcp_client.connect_to_host()
+	tcp_client.connect_to_host($UI/IP_TextBox.text)
 
 
 func _process(delta: float) -> void:
@@ -104,36 +97,50 @@ func _process(delta: float) -> void:
 	
 
 func _on_packet_received(packet: NetworkPacket.GameDataPacket):
-	$UI/PlayerIDLabel.text = "Player %d" % (packet.current_player_id + 1)
+	$UI/PlayerIDLabel.text = "Player %d" % (packet.current_player_id)
 	local_player_index = packet.current_player_id
+	
+	if not packet.players[local_player_index].is_alive:
+		print_debug("Died")
+		get_tree().quit()
 	
 	if packet.board_width != current_board_w or packet.board_height != current_board_h:
 		current_board_w = packet.board_width
 		current_board_h = packet.board_height
 		rebuild_board(current_board_w, current_board_h)
+		$Camera2D.zoom = Vector2.ONE * (30.0 / current_board_w) # zoom out when board gets larger
 		
 	if packet.player_count == 0:
 		return
 	for i in range(len(packet.players)):
 		var p_data = packet.players[i]
-		var segments_array = player_segments[i]
+		# TODO: get player index
+		var player_idx = p_data.index
+		var segments_array = player_segments[player_idx]
+		
 		
 		if not p_data.is_alive:
-			if i < len(player_nodes): player_nodes[i].hide()
+			if player_nodes[player_idx] != null: player_nodes[i].hide()
 			for seg in segments_array: seg.hide()
 			continue
 		
-		if not player_nodes[i].visible:
-			player_nodes[i].show()
+		if player_nodes[player_idx] == null:
+			var new_player: AnimatedSprite2D = player_scene.instantiate()
+			new_player.show()
+			add_child(new_player)
+			player_nodes[player_idx] = new_player 
 		
-		player_nodes[i].position = (p_data.positions[0] * 32) + Vector2i(16, 16)
-		player_nodes[i].z_index = 5
+		if not player_nodes[player_idx].visible:
+			player_nodes[player_idx].show()
 		
-		var head = player_nodes[i] as AnimatedSprite2D
+		player_nodes[player_idx].position = (p_data.positions[0] * 32) + Vector2i(16, 16)
+		player_nodes[player_idx].z_index = 5
+		
+		var head = player_nodes[player_idx] as AnimatedSprite2D
 		if head:
 			head.play("head_straight")
 			head.rotation = get_rotation_for_dir(p_data.direction)
-			last_directions[i] = p_data.direction
+			last_directions[player_idx] = p_data.direction
 
 		var body_length = p_data.length - 1
 		while len(segments_array) < body_length:
@@ -204,9 +211,12 @@ func _on_packet_received(packet: NetworkPacket.GameDataPacket):
 
 func _on_connected():
 	connect_button.hide()
+	$UI/IP_TextBox.hide()
+	
 
 func _on_disconnected():
-	test_player.queue_free()
+	pass
+	# test_player.queue_free()
 	
 func rebuild_board(w: int, h: int):
 	if not has_node("TileMapLayer"): 

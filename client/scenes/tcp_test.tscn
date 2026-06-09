@@ -1,11 +1,7 @@
 [gd_scene format=3 uid="uid://dhfd22yok5bdl"]
 
 [ext_resource type="Script" uid="uid://dqaspabfyrcjo" path="res://scenes/tcp_test.gd" id="1_m2txu"]
-[ext_resource type="Texture2D" uid="uid://dfjxlqqa6j35w" path="res://assets/Grafika_bez_nazwy 4.png" id="2_daxcd"]
 [ext_resource type="Texture2D" uid="uid://bayd65jdva7e8" path="res://assets/Mur_Dol.png" id="3_lakwm"]
-[ext_resource type="Texture2D" uid="uid://dafrada50vlr0" path="res://assets/Grafika_bez_nazwy 3.png" id="3_sgbnt"]
-[ext_resource type="Texture2D" uid="uid://dwxpkyuyq0axa" path="res://assets/snake.jpg" id="3_txiec"]
-[ext_resource type="Texture2D" uid="uid://b27rxttvo7yvs" path="res://assets/Grafika_bez_nazwy 2.png" id="4_chght"]
 [ext_resource type="Texture2D" uid="uid://c6mtetg2re4lv" path="res://assets/Mur_Gora.png" id="4_q0kb5"]
 [ext_resource type="Texture2D" uid="uid://cia14kdr36tfh" path="res://assets/Mur_Lewo.png" id="5_bjufg"]
 [ext_resource type="Texture2D" uid="uid://kuax4u0d33xb" path="res://assets/Mur_Prawo.png" id="6_daxcd"]
@@ -15,33 +11,6 @@
 [ext_resource type="Texture2D" uid="uid://dq7knvrcyumoh" path="res://assets/Naroznik_Prawy_Gorny.png" id="10_lghs7"]
 [ext_resource type="Texture2D" uid="uid://dven67apge6wa" path="res://assets/Podloga_1.png" id="11_6wlcr"]
 [ext_resource type="Texture2D" uid="uid://bxpelkr2lbp0g" path="res://assets/Podloga_2.png" id="12_xejdl"]
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_r72fd"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("2_daxcd")
-}],
-"loop": true,
-"name": &"head_straight",
-"speed": 0.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("3_sgbnt")
-}],
-"loop": true,
-"name": &"head_turn_left",
-"speed": 0.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("4_chght")
-}],
-"loop": true,
-"name": &"head_turn_right",
-"speed": 0.0
-}]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lakwm"]
 texture = ExtResource("3_lakwm")
@@ -109,56 +78,6 @@ sources/19 = SubResource("TileSetAtlasSource_xejdl")
 [node name="TCP Test" type="Node2D" unique_id=1033222761]
 script = ExtResource("1_m2txu")
 
-[node name="TestPlayer1" type="AnimatedSprite2D" parent="." unique_id=696078384]
-rotation = 1.5707964
-sprite_frames = SubResource("SpriteFrames_r72fd")
-animation = &"head_turn_right"
-
-[node name="Label" type="Label" parent="TestPlayer1" unique_id=348901969]
-visible = false
-offset_left = 538.652
-offset_top = -774.3122
-offset_right = 548.652
-offset_bottom = -751.3122
-scale = Vector2(20, 20)
-text = "1"
-
-[node name="TestPlayer2" type="Sprite2D" parent="." unique_id=351557094]
-scale = Vector2(0.08911134, 0.08911134)
-texture = ExtResource("3_txiec")
-
-[node name="Label" type="Label" parent="TestPlayer2" unique_id=1502496934]
-offset_left = 538.652
-offset_top = -774.3122
-offset_right = 548.652
-offset_bottom = -751.3122
-scale = Vector2(20, 20)
-text = "2"
-
-[node name="TestPlayer3" type="Sprite2D" parent="." unique_id=932437428]
-scale = Vector2(0.08911134, 0.08911134)
-texture = ExtResource("3_txiec")
-
-[node name="Label" type="Label" parent="TestPlayer3" unique_id=2081919562]
-offset_left = 538.652
-offset_top = -774.3122
-offset_right = 548.652
-offset_bottom = -751.3122
-scale = Vector2(20, 20)
-text = "3"
-
-[node name="TestPlayer4" type="Sprite2D" parent="." unique_id=1049204082]
-scale = Vector2(0.08911134, 0.08911134)
-texture = ExtResource("3_txiec")
-
-[node name="Label" type="Label" parent="TestPlayer4" unique_id=1129088399]
-offset_left = 538.652
-offset_top = -774.3122
-offset_right = 548.652
-offset_bottom = -751.3122
-scale = Vector2(20, 20)
-text = "4"
-
 [node name="UI" type="CanvasLayer" parent="." unique_id=1336527670]
 
 [node name="ConnectButton" type="Button" parent="UI" unique_id=204343268]
@@ -183,6 +102,21 @@ offset_left = -40.0
 offset_bottom = 23.0
 grow_horizontal = 0
 theme_override_font_sizes/font_size = 24
+
+[node name="IP_TextBox" type="LineEdit" parent="UI" unique_id=1260495934]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -111.0
+offset_top = -70.0
+offset_right = 111.0
+offset_bottom = -39.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "127.0.0.1"
+placeholder_text = "IP"
 
 [node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=2112907138]
 tile_set = SubResource("TileSet_s00y6")

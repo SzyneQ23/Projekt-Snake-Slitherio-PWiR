@@ -30,6 +30,7 @@ class PlayerData extends RefCounted:
 	var direction: Vector2i
 	var length: int
 	var is_alive: bool
+	var index: int
 	func _init() -> void:
 		pass
 
@@ -60,11 +61,13 @@ class GameDataPacket extends BaseNetworkPacket:
 			var dir_y = bytes.decode_s32(4)
 			var p_length = bytes.decode_s32(808)
 			var p_alive = bytes.decode_s8(812) == 1
+			var p_index = bytes.decode_s8(813)
 			
 			var p_data = PlayerData.new()
 			p_data.direction = Vector2i(dir_x, dir_y)
 			p_data.length = p_length
 			p_data.is_alive = p_alive
+			p_data.index = p_index
 			
 			for j in range(p_length):
 				var px = bytes.decode_s32(8 + (j * 8))
@@ -74,7 +77,7 @@ class GameDataPacket extends BaseNetworkPacket:
 			self.players.append(p_data)
 			bytes = bytes.slice(816) 
 		
-		var empty_slots = 8 - player_count
+		var empty_slots = TcpClient.MAX_PLAYER_COUNT - player_count
 		bytes = bytes.slice(empty_slots * 816)
 		
 		self.foods.clear()
@@ -84,7 +87,7 @@ class GameDataPacket extends BaseNetworkPacket:
 			var is_active = bytes.decode_s8(8) 
 			var item_type = bytes.decode_s8(9)
 			
-			bytes = bytes.slice(12)
+			bytes = bytes.slice(10)
 			if is_active == 1:
 				self.foods.append({"pos": Vector2i(food_x, food_y), "type": item_type})
 				
