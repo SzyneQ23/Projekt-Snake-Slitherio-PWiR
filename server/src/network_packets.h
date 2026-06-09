@@ -32,6 +32,7 @@ typedef struct {
     Position pos[MAX_SNAKE_LENGTH];
     int length;
     char isAlive;
+    char player_idx;
 } PlayerData;
 
 

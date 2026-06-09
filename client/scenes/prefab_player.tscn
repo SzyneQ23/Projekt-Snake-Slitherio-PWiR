@@ -37,6 +37,7 @@ sprite_frames = SubResource("SpriteFrames_r72fd")
 animation = &"head_turn_right"
 
 [node name="Label" type="Label" parent="." unique_id=81856987]
+visible = false
 offset_left = 538.652
 offset_top = -774.3122
 offset_right = 548.652

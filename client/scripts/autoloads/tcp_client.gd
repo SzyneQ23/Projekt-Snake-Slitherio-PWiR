@@ -12,6 +12,7 @@ signal connected
 const HOST_ADDRESS = "127.0.0.1"
 const HOST_PORT = 5000
 
+const MAX_PLAYER_COUNT = 8
 
 var stream_peer:StreamPeerTCP = null
 var peer_status: StreamPeerSocket.Status = StreamPeerSocket.Status.STATUS_NONE

@@ -174,10 +174,12 @@ void* game_loop_thread(void* arg) {
             if (player->pos[0].x < 0 || player->pos[0].x >= current_board_size || 
                 player->pos[0].y < 0 || player->pos[0].y >= current_board_size) {
                 destroySnake = 1;
+                printf("Player %d hit a wall\n", p);
             }
 
             // check collision with other snakes
             for (int i = 0; i < global_state.player_count; i++) {
+                if(destroySnake == 1) break;// early return
                 if (global_state.players[i].isAlive) {
                     int start_seg = (i == p) ? 1 : 0;
                     for(int j = start_seg; j < global_state.players[i].length; j++) {
@@ -186,6 +188,10 @@ void* game_loop_thread(void* arg) {
                             destroySnake = 1;
                         }
                     }
+                }
+                if(destroySnake == 1){
+                    printf("Player %d hit another snake (%d)\n", p, i);
+                    break;
                 }
             }
 
@@ -267,6 +273,7 @@ void* game_loop_thread(void* arg) {
             };
             
             write(sock, &packet, sizeof(packet));
+
         }
 
         pthread_mutex_unlock(&game_mutex);
@@ -349,7 +356,8 @@ int main(int argc, char *argv[]) {
             .length = START_SNAKE_LENGTH,
             .pos[0].x = 5,
             .pos[0].y = 5,
-            .isAlive = 1
+            .isAlive = 1,
+            .player_idx = player_index
         };
 
         // player data initialization (segments)
