@@ -63,7 +63,7 @@ func _ready() -> void:
 	tcp_client.disconnected.connect(_on_disconnected)
 
 func _on_button_pressed():
-	tcp_client.connect_to_host()
+	tcp_client.connect_to_host($UI/IP_TextBox.text)
 
 
 func _process(delta: float) -> void:
@@ -211,6 +211,7 @@ func _on_packet_received(packet: NetworkPacket.GameDataPacket):
 
 func _on_connected():
 	connect_button.hide()
+	$UI/IP_TextBox.hide()
 	
 
 func _on_disconnected():

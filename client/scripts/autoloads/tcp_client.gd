@@ -9,7 +9,7 @@ signal connected
 
 
 # TODO: Ideally these would be pulled from something like a .env file and not hard-coded
-const HOST_ADDRESS = "127.0.0.1"
+var HOST_ADDRESS = "127.0.0.1"
 const HOST_PORT = 5000
 
 const MAX_PLAYER_COUNT = 8
@@ -20,7 +20,8 @@ var peer_status: StreamPeerSocket.Status = StreamPeerSocket.Status.STATUS_NONE
 func is_connected_to_server() -> bool:
 	return peer_status == StreamPeerSocket.Status.STATUS_CONNECTED
 
-func connect_to_host() -> bool:
+func connect_to_host(ip:String) -> bool:
+	HOST_ADDRESS = ip
 	if peer_status == stream_peer.STATUS_CONNECTED:
 		print_debug("Server connection already established")
 		return true

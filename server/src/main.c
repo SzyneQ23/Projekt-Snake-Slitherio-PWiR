@@ -128,6 +128,7 @@ void* connection_handler(void *args) {
     pthread_mutex_lock(&game_mutex);
     global_state.players[player_index].isAlive = 0;
     global_state.player_sockets[player_index] = -1;
+    global_state.player_count--;
     pthread_mutex_unlock(&game_mutex);
 
     close(sock);
@@ -346,7 +347,21 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        int player_index = global_state.player_count;
+        // find first free slot
+        int player_index = -1;
+        for(int i=0; i< MAX_PLAYER_COUNT; i++){
+            if(!global_state.players[i].isAlive){
+                player_index = i;
+                break;
+            }
+        }
+
+        if(player_index == -1){
+            printf("Error: no empty slots for a new player\n");
+            break;
+        }
+        printf("found index: %d\n", player_index);
+
         global_state.player_sockets[player_index] = connfd;
 
         // player starts at (5, 5) pointing right

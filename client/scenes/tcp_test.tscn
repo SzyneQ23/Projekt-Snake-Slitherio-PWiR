@@ -103,6 +103,21 @@ offset_bottom = 23.0
 grow_horizontal = 0
 theme_override_font_sizes/font_size = 24
 
+[node name="IP_TextBox" type="LineEdit" parent="UI" unique_id=1260495934]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -111.0
+offset_top = -70.0
+offset_right = 111.0
+offset_bottom = -39.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "127.0.0.1"
+placeholder_text = "IP"
+
 [node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=2112907138]
 tile_set = SubResource("TileSet_s00y6")
 
