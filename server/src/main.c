@@ -54,7 +54,7 @@ int is_position_free(int target_x, int target_y) {
     }
     // --------------------------------
     
-    for (int i = 0; i < global_state.player_count; i++) {
+    for (int i = 0; i < MAX_PLAYER_COUNT; i++) {
         if (global_state.players[i].isAlive == 1) {
             for(int j = 0; j < global_state.players[i].length; j++) {
                 if (global_state.players[i].pos[j].x == target_x && global_state.players[i].pos[j].y == target_y) return 0;
@@ -128,7 +128,6 @@ void* connection_handler(void *args) {
     pthread_mutex_lock(&game_mutex);
     global_state.players[player_index].isAlive = 0;
     global_state.player_sockets[player_index] = -1;
-    global_state.player_count--;
     pthread_mutex_unlock(&game_mutex);
 
     close(sock);
@@ -149,7 +148,7 @@ void* game_loop_thread(void* arg) {
         // ----- Update board state -----
 
         // move all alive players
-        for (int p = 0; p < global_state.player_count; p++) {
+        for (int p = 0; p < MAX_PLAYER_COUNT; p++) {
             PlayerData* player = &global_state.players[p];
             if (!player->isAlive) continue;
 
@@ -165,7 +164,7 @@ void* game_loop_thread(void* arg) {
         }
 
         // check collisions, eat food and bonuses for all players
-        for (int p = 0; p < global_state.player_count; p++) {
+        for (int p = 0; p < MAX_PLAYER_COUNT; p++) {
             PlayerData* player = &global_state.players[p];
             if (!player->isAlive) continue;
 
@@ -179,7 +178,7 @@ void* game_loop_thread(void* arg) {
             }
 
             // check collision with other snakes
-            for (int i = 0; i < global_state.player_count; i++) {
+            for (int i = 0; i < MAX_PLAYER_COUNT; i++) {
                 if(destroySnake == 1) break;// early return
                 if (global_state.players[i].isAlive) {
                     int start_seg = (i == p) ? 1 : 0;
@@ -220,7 +219,7 @@ void* game_loop_thread(void* arg) {
                     
                     food[i].x = rx;
                     food[i].y = ry;
-                    food[i].item_type = rand() % 2;
+                   // food[i].item_type = rand() % 2;
                 }
             }
 
@@ -252,7 +251,7 @@ void* game_loop_thread(void* arg) {
         }
 
         // ----- Send updated game state to ALL connected clients -----
-        for (int p = 0; p < global_state.player_count; p++) {
+        for (int p = 0; p < MAX_PLAYER_COUNT; p++) {
             int sock = global_state.player_sockets[p];
             if (sock == -1) continue;
 
@@ -274,7 +273,6 @@ void* game_loop_thread(void* arg) {
             };
             
             write(sock, &packet, sizeof(packet));
-
         }
 
         pthread_mutex_unlock(&game_mutex);
@@ -289,6 +287,12 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in serv_addr;
 
     pthread_t thread_id;
+
+    // Explicitly initialize empty slot states to avoid 0-initialization bugs
+    for(int i = 0; i < MAX_PLAYER_COUNT; i++) {
+        global_state.player_sockets[i] = -1;
+        global_state.players[i].isAlive = 0;
+    }
 
     socketfd = socket(AF_INET, SOCK_STREAM, 0);
     
@@ -311,11 +315,11 @@ int main(int argc, char *argv[]) {
     }
 
     // initialize food
-    for (int i = 0; i < MAX_NUMBER_OF_FOOD; i++) {
+   for (int i = 0; i < MAX_NUMBER_OF_FOOD; i++) {
         food[i].x = rand() % 20;
         food[i].y = rand() % 20;
         food[i].isActive = 1;
-        food[i].item_type = rand() % 2; 
+        food[i].item_type = i; 
     }
 
     // initialize bonuses
@@ -340,37 +344,43 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Connection accepted\n");
 
         pthread_mutex_lock(&game_mutex);
-        if (global_state.player_count >= MAX_PLAYER_COUNT) {
-            printf("Server full, connection rejected.\n");
-            close(connfd);
-            pthread_mutex_unlock(&game_mutex);
-            continue;
-        }
 
         // find first free slot
         int player_index = -1;
         for(int i=0; i< MAX_PLAYER_COUNT; i++){
-            if(!global_state.players[i].isAlive){
+            if(global_state.player_sockets[i] == -1){
                 player_index = i;
                 break;
             }
         }
 
         if(player_index == -1){
-            printf("Error: no empty slots for a new player\n");
-            break;
+            printf("Server full, connection rejected.\n");
+            close(connfd);
+            pthread_mutex_unlock(&game_mutex);
+            continue;
         }
         printf("found index: %d\n", player_index);
 
         global_state.player_sockets[player_index] = connfd;
 
-        // player starts at (5, 5) pointing right
+        // Completely clear old data buffer for this exact slot before rewriting
+        memset(&global_state.players[player_index], 0, sizeof(PlayerData));
+
+        // find a clean, non-colliding starting coordinate for the new connection
+        int current_board_size = 20 + (global_state.player_count * 4);
+        int rand_start_x, rand_start_y;
+        do {
+            rand_start_x = (rand() % (current_board_size - START_SNAKE_LENGTH)) + START_SNAKE_LENGTH;
+            rand_start_y = rand() % current_board_size;
+        } while (is_position_free(rand_start_x, rand_start_y) == 0);
+
         PlayerData player_data = {
             .move_dir_x = 1,
             .move_dir_y = 0,
             .length = START_SNAKE_LENGTH,
-            .pos[0].x = 5,
-            .pos[0].y = 5,
+            .pos[0].x = rand_start_x,
+            .pos[0].y = rand_start_y,
             .isAlive = 1,
             .player_idx = player_index
         };
@@ -382,7 +392,11 @@ int main(int argc, char *argv[]) {
         }
 
         global_state.players[player_index] = player_data;
-        global_state.player_count++;
+        
+        if (player_index >= global_state.player_count) {
+            global_state.player_count = player_index + 1;
+        }
+        
         pthread_mutex_unlock(&game_mutex);
 
         // Safe argument passing using dynamic allocation
