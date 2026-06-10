@@ -87,7 +87,7 @@ class GameDataPacket extends BaseNetworkPacket:
 			var is_active = bytes.decode_s8(8) 
 			var item_type = bytes.decode_s8(9)
 			
-			bytes = bytes.slice(10)
+			bytes = bytes.slice(12)
 			if is_active == 1:
 				self.foods.append({"pos": Vector2i(food_x, food_y), "type": item_type})
 				

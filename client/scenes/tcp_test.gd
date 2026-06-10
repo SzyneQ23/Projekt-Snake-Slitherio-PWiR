@@ -101,8 +101,20 @@ func _on_packet_received(packet: NetworkPacket.GameDataPacket):
 	local_player_index = packet.current_player_id
 	
 	if not packet.players[local_player_index].is_alive:
-		print_debug("Died")
-		get_tree().quit()
+		print_debug("Died - wracam do menu")
+		
+		tcp_client.disconnect_from_host()
+		
+		$UI/ConnectButton.show()
+		if has_node("UI/IP_TextBox"):
+			$UI/IP_TextBox.show()
+			
+		for p in player_nodes:
+			if p != null: p.hide()
+		for seg_array in player_segments:
+			for seg in seg_array: seg.hide()
+			
+		return
 	
 	if packet.board_width != current_board_w or packet.board_height != current_board_h:
 		current_board_w = packet.board_width
